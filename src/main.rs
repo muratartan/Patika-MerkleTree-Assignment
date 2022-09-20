@@ -1,14 +1,11 @@
+#![allow(unused_assignments, non_snake_case)]
+
 use std::fs::read_to_string;
 
 use sha2::{Digest, Sha256};
 
 fn merkle_root(filename: String) -> String {
-    // Read Input Data from txt file
-
     let input_data = read_to_string(filename).expect("error when reading the file");
-    println!("{}", input_data);
-
-    // Create vector of strings for leaves
 
     let mut vector_of_strings: Vec<String> = input_data
         .lines()
@@ -16,23 +13,37 @@ fn merkle_root(filename: String) -> String {
         .map(|line| line.to_string())
         .collect();
 
-    //let n = vector_of_strings[0].parse::<u32>().unwrap();
-
     let n = vector_of_strings.remove(0).parse::<u32>().unwrap();
 
-    // Hash inputs and append to vector
+    let mut hexed_vector: Vec<String> = Vec::new();
 
-    // Then Write an algorithm that calculates the ROOT
+    for _ in 0..n {
+        hexed_vector = vector_of_strings
+            .iter()
+            .map(|i: &String| hash_input(i))
+            .collect();
+        vector_of_strings = create_next_level(hexed_vector);
+    }
 
-    // Return the root hash as a String
+    let root = hash_input(&vector_of_strings[0]);
+    root
 }
 
-// You can use templates below or just remove
-// Helper function to create a next leaves level may help you :)
+fn create_next_level(current_level: Vec<String>) -> Vec<String> {
+    let mut combined_string = String::new();
+    let mut node_vec: Vec<String> = Vec::new();
 
-fn create_next_level(current_level: Vec<String>) -> Vec<String> {}
+    for (i, v) in current_level.iter().enumerate() {
+        if i % 2 == 0 {
+            combined_string = v.clone();
+        } else {
+            combined_string.push_str(&v);
+            node_vec.push(combined_string.clone());
+        }
+    }
 
-// Helper function may help you to hash an input or You can write macro rules
+    node_vec
+}
 
 fn hash_input(a: &str) -> String {
     let mut hasher = Sha256::new();
@@ -44,7 +55,22 @@ fn hash_input(a: &str) -> String {
     return hex.to_string();
 }
 
-fn main() {}
+fn main() {
+    let input0_root = merkle_root("input0.txt".to_string());
+    println!("The root hash of input0 file is: {}", input0_root);
+
+    let input1_root = merkle_root("input1.txt".to_string());
+    println!("The root hash of input1 file is: {}", input1_root);
+
+    let input2_root = merkle_root("input2.txt".to_string());
+    println!("The root hash of input2 file is: {}", input2_root);
+
+    let input3_root = merkle_root("input3.txt".to_string());
+    println!("The root hash of input3 file is: {}", input3_root);
+
+    let input4_root = merkle_root("input4.txt".to_string());
+    println!("The root hash of input4 file is: {}", input4_root);
+}
 
 // Pass all tests!
 #[cfg(test)]
