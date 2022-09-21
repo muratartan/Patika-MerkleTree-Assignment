@@ -5,18 +5,22 @@ use std::fs::read_to_string;
 use sha2::{Digest, Sha256};
 
 fn merkle_root(filename: String) -> String {
+    // read the entire data from the file
     let input_data = read_to_string(filename).expect("error when reading the file");
 
+    // iterate over the lines of the read data
     let mut vector_of_strings: Vec<String> = input_data
         .lines()
         .into_iter()
         .map(|line| line.to_string())
         .collect();
 
+    // remove the first line for n value and parse to u32
     let n = vector_of_strings.remove(0).parse::<u32>().unwrap();
 
     let mut hexed_vector: Vec<String> = Vec::new();
 
+    // hash all strings
     for _ in 0..n {
         hexed_vector = vector_of_strings
             .iter()
@@ -25,6 +29,7 @@ fn merkle_root(filename: String) -> String {
         vector_of_strings = create_next_level(hexed_vector);
     }
 
+    // return the root hash
     let root = hash_input(&vector_of_strings[0]);
     root
 }
@@ -33,6 +38,7 @@ fn create_next_level(current_level: Vec<String>) -> Vec<String> {
     let mut combined_string = String::new();
     let mut node_vec: Vec<String> = Vec::new();
 
+    // take every couple string and combine them
     for (i, v) in current_level.iter().enumerate() {
         if i % 2 == 0 {
             combined_string = v.clone();
